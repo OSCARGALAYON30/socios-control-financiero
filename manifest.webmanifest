@@ -1,0 +1,9 @@
+{
+  "name": "SOCIOS · Control Financiero",
+  "short_name": "SOCIOS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#0f172a",
+  "description": "Dashboard de consulta financiera de socios"
+}
