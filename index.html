@@ -16,6 +16,9 @@ button,input,select{font:inherit}.app{min-height:100vh;display:grid;grid-templat
 
 .liq-owner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px}.owner-badge{display:inline-flex;align-items:center;gap:7px;background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:700}.liq-chart{width:100%;height:auto;display:block}.chart-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:#667085;margin-top:8px}.legend-line{display:inline-block;width:24px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}.legend-proj{background:#2563eb}.legend-real{background:#15803d}.legend-invest{background:#b45309}.recovery-bar{height:12px;border-radius:999px;background:#eef2f6;overflow:hidden}.recovery-bar span{display:block;height:100%;background:#22c55e;border-radius:999px}.waterfall{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.water-item{padding:12px;border:1px solid #eef1f4;background:#f8fafc;border-radius:10px}.water-item small{display:block;color:#667085}.water-item b{display:block;margin-top:5px;font-size:15px}.water-item.cost b{color:#b45309}.water-item.net b{color:#15803d}
 @media(max-width:700px){.waterfall{grid-template-columns:1fr 1fr}}
+
+.multi-filter{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:320px}.multi-filter>label{display:block;font-size:10px;text-transform:uppercase;color:#98a2b3;letter-spacing:.06em;margin-bottom:7px}.multi-options{display:flex;gap:7px;flex-wrap:wrap}.checkchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 9px;font-size:12px;color:#475467;background:#fff;cursor:pointer}.checkchip.selected{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8;font-weight:650}.checkchip input{margin:0;width:auto}.selection-note{font-size:11px;color:#667085;margin-top:6px}
+@media(max-width:520px){.multi-filter{min-width:100%}.multi-options{display:grid;grid-template-columns:1fr}.checkchip{border-radius:9px;min-height:42px}}
 </style>
 </head>
 <body>
@@ -45,7 +48,7 @@ const pct=n=>new Intl.NumberFormat('es-CO',{style:'percent',maximumFractionDigit
 const dateFmt=s=>{if(!s)return '—'; const d=new Date(s+'T00:00:00'); return new Intl.DateTimeFormat('es-CO',{day:'2-digit',month:'short',year:'numeric'}).format(d)};
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const projectById=id=>DATA.projects.find(p=>p.id===id);
-let state={view:'general',project:null,company:'ALL',soc:'ALL',colegiosSocio:'ALL',status:'ALL',cutoff:'2026-10-14',sentTab:'Vigente',sentInvestor:'ALL',sentEntity:'ALL',sentRegime:'ALL',sentQuery:''};
+let state={view:'general',project:null,company:'ALL',soc:'ALL',colegiosSocio:'ALL',status:'ALL',cutoff:'2026-10-14',sentTab:'Vigente',sentInvestors:[],sentEntity:'ALL',sentRegime:'ALL',sentQuery:''};
 function setNav(){ $$('.navbtn').forEach(b=>b.classList.remove('active')); const sel=state.project?`.navbtn[data-project="${state.project}"]`:`.navbtn[data-view="${state.view}"]`; const x=$(sel); if(x)x.classList.add('active'); }
 function initNav(){ $('#projectNav').innerHTML=DATA.projects.map(p=>`<button class="navbtn" data-project="${p.id}"><span class="dot"></span>${esc(p.name)}</button>`).join(''); document.addEventListener('click',e=>{const b=e.target.closest('.navbtn'); if(!b)return; if(b.dataset.project){openProject(b.dataset.project)} else if(b.dataset.view){state.project=null; state.view=b.dataset.view; render();} $('#sidebar').classList.remove('open');}); $('#menuBtn').onclick=()=>$('#sidebar').classList.toggle('open'); }
 function globalFilters(){return `<div class="filters"><div class="filter"><label>Fecha de corte</label><input type="date" value="${state.cutoff}" onchange="state.cutoff=this.value;render()"></div><div class="filter"><label>Empresa</label><select onchange="state.company=this.value;render()"><option value="ALL">Todas</option>${DATA.companies.map(c=>`<option ${state.company===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div><div class="filter"><label>Socio</label><select onchange="state.soc=this.value;render()"><option value="ALL">Todos</option><option ${state.soc==='WG'?'selected':''}>WG</option><option ${state.soc==='FC'?'selected':''}>FC</option></select></div><div class="filter"><label>Estado</label><select onchange="state.status=this.value;render()"><option value="ALL">Todos</option><option ${state.status==='Con datos'?'selected':''}>Con datos</option><option ${state.status==='Pendiente de fuente'?'selected':''}>Pendiente de fuente</option></select></div></div>`}
@@ -90,10 +93,81 @@ function renderColegios(p){
  return h;
 }
 function xirr(flows){if(flows.length<2)return null; const t0=new Date(flows[0].date); const npv=r=>flows.reduce((s,f)=>s+f.value/Math.pow(1+r,(new Date(f.date)-t0)/(365*86400000)),0); let lo=-.9999,hi=10; let flo=npv(lo),fhi=npv(hi); for(let k=0;k<20&&flo*fhi>0;k++){hi*=2;fhi=npv(hi)} if(flo*fhi>0)return null; for(let i=0;i<120;i++){const mid=(lo+hi)/2,fm=npv(mid);if(Math.abs(fm)<.01)return mid;if(flo*fm<=0){hi=mid;fhi=fm}else{lo=mid;flo=fm}}return (lo+hi)/2}
-function aggregateSentRows(status){const raw=DATA.sentencias.rows.filter(r=>r.state===status).filter(r=>state.sentInvestor==='ALL'||r.investor_norm===state.sentInvestor).filter(r=>state.sentEntity==='ALL'||r.entity===state.sentEntity).filter(r=>state.sentRegime==='ALL'||r.regime===state.sentRegime).filter(r=>!state.sentQuery||r.case.toLowerCase().includes(state.sentQuery.toLowerCase())); const m=new Map(); raw.forEach(r=>{const k=r.group_key+'|'+r.investor_norm; if(!m.has(k))m.set(k,{...r,investment:0,current_or_return:0,tirVals:[],participation_pct:r.participation_pct}); const x=m.get(k);x.investment+=r.investment;x.current_or_return+=r.current_or_return;x.tirVals.push(r.tir); x.case=x.case.length<=r.case.length?x.case:r.case}); return [...m.values()].map(x=>{const flows=[{date:x.invest_date,value:-x.investment},{date:x.valuation_date,value:x.current_or_return}].filter(f=>f.date&&f.value); x.tirCalc=xirr(flows)??(x.tirVals.reduce((a,b)=>a+b,0)/Math.max(1,x.tirVals.length)); return x})}
-function renderSentencias(p){ const rows=aggregateSentRows(state.sentTab); const inv=sum(rows,'investment'), val=sum(rows,'current_or_return'), profit=val-inv; const flows=[]; rows.forEach(r=>{if(r.invest_date)flows.push({date:r.invest_date,value:-r.investment});if(r.valuation_date)flows.push({date:r.valuation_date,value:r.current_or_return})}); flows.sort((a,b)=>a.date.localeCompare(b.date)); const tir=xirr(flows); const unique=new Set(rows.map(r=>r.group_key)).size; const invs=[...new Set(DATA.sentencias.rows.map(r=>r.investor_norm).filter(Boolean))].sort(); const ents=[...new Set(DATA.sentencias.rows.map(r=>r.entity).filter(Boolean))].sort(); const regs=[...new Set(DATA.sentencias.rows.map(r=>r.regime).filter(Boolean))].sort(); let h=projectHeader(p,'Portafolio judicial · tabla operativa y ficha consolidada'); h+=`<div class="tabs"><button class="tab ${state.sentTab==='Vigente'?'active':''}" onclick="state.sentTab='Vigente';render()">Vigentes</button><button class="tab ${state.sentTab==='Cancelado'?'active':''}" onclick="state.sentTab='Cancelado';render()">Canceladas</button></div><div class="filters"><div class="filter"><label>Inversionista</label><select onchange="state.sentInvestor=this.value;render()"><option value="ALL">Todos</option>${invs.map(x=>`<option ${state.sentInvestor===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="filter"><label>Entidad</label><select onchange="state.sentEntity=this.value;render()"><option value="ALL">Todas</option>${ents.map(x=>`<option ${state.sentEntity===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="filter"><label>Régimen</label><select onchange="state.sentRegime=this.value;render()"><option value="ALL">Todos</option>${regs.map(x=>`<option ${state.sentRegime===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="filter"><label>Buscar caso</label><input placeholder="Nombre del caso" value="${esc(state.sentQuery)}" oninput="state.sentQuery=this.value;render()"></div></div>`;
- h+=`<div class="kpis">${kpi('Sentencias',unique,'Casos únicos filtrados')}${kpi('Inversión',money(inv),'Valor desembolso')}${kpi(state.sentTab==='Vigente'?'Valoración actual':'Valor recibido / retorno',money(val))}${kpi(state.sentTab==='Vigente'?'Utilidad potencial':'Utilidad realizada',money(profit))}${kpi(state.sentTab==='Vigente'?'TIR portafolio':'TIR realizada',tir==null?'—':pct(tir),'Recalculada con flujos filtrados')}${kpi('Filas inversionista',rows.length,'Participaciones consolidadas')}</div>`;
- h+=`<div class="section-title"><div><h3>${state.sentTab==='Vigente'?'Portafolio vigente':'Negocios cancelados'}</h3><p>Haz clic sobre un caso para abrir su ficha consolidada</p></div></div><div class="tablewrap"><table><thead><tr><th>Estado</th><th>Caso</th><th>Inversionista</th><th>% Part.</th><th>Fecha inversión</th><th style="text-align:right">Inversión</th><th style="text-align:right">${state.sentTab==='Vigente'?'Valoración actual':'Retorno real'}</th><th style="text-align:right">TIR</th></tr></thead><tbody>${rows.map(r=>`<tr><td><span class="status ${r.state==='Vigente'?'ready':''}">${r.state}</span></td><td><button class="case-link" onclick="openCase('${encodeURIComponent(r.group_key)}')">${esc(r.case)}</button><div class="muted" style="font-size:10px">${esc(r.entity||'')} · ${esc(r.regime||'')}</div></td><td>${esc(r.investor_norm||'—')}</td><td>${r.participation_pct==null?'—':r.participation_pct.toLocaleString('es-CO',{maximumFractionDigits:2})+'%'}</td><td>${dateFmt(r.invest_date)}</td><td class="num">${money(r.investment)}</td><td class="num">${money(r.current_or_return)}</td><td class="num">${pct(r.tirCalc||0)}</td></tr>`).join('')}</tbody></table></div><div class="source">Fuente: ${esc(DATA.sentencias.summary.source)} · Actualizada ${DATA.sentencias.summary.updated}</div>`; return h}
+function investorLabel(x){return x==='EON'?'INVERSIONES EON':x}
+function toggleSentInvestor(x,checked){
+ const set=new Set(state.sentInvestors||[]);
+ if(checked)set.add(x);else set.delete(x);
+ state.sentInvestors=[...set];
+ render();
+}
+function clearSentInvestors(){state.sentInvestors=[];render()}
+function aggregateSentRows(status){
+ const selected=state.sentInvestors||[];
+ const raw=DATA.sentencias.rows
+  .filter(r=>r.state===status)
+  .filter(r=>selected.length===0||selected.includes(r.investor_norm))
+  .filter(r=>state.sentEntity==='ALL'||r.entity===state.sentEntity)
+  .filter(r=>state.sentRegime==='ALL'||r.regime===state.sentRegime)
+  .filter(r=>!state.sentQuery||r.case.toLowerCase().includes(state.sentQuery.toLowerCase()));
+ const m=new Map();
+ raw.forEach(r=>{
+  const k=r.group_key+'|'+r.investor_norm;
+  if(!m.has(k))m.set(k,{...r,investment:0,current_or_return:0,tirVals:[],participation_pct:r.participation_pct});
+  const x=m.get(k);
+  x.investment+=r.investment;
+  x.current_or_return+=r.current_or_return;
+  x.tirVals.push(r.tir);
+  x.case=x.case.length<=r.case.length?x.case:r.case
+ });
+ return [...m.values()].map(x=>{
+  const flows=[{date:x.invest_date,value:-x.investment},{date:x.valuation_date,value:x.current_or_return}].filter(f=>f.date&&f.value);
+  x.tirCalc=xirr(flows)??(x.tirVals.reduce((a,b)=>a+b,0)/Math.max(1,x.tirVals.length));
+  return x
+ })
+}
+function renderSentencias(p){
+ const rows=aggregateSentRows(state.sentTab);
+ const inv=sum(rows,'investment'), val=sum(rows,'current_or_return'), profit=val-inv;
+ const flows=[];
+ rows.forEach(r=>{if(r.invest_date)flows.push({date:r.invest_date,value:-r.investment});if(r.valuation_date)flows.push({date:r.valuation_date,value:r.current_or_return})});
+ flows.sort((a,b)=>a.date.localeCompare(b.date));
+ const tir=xirr(flows);
+ const unique=new Set(rows.map(r=>r.group_key)).size;
+ const invs=[...new Set(DATA.sentencias.rows.map(r=>r.investor_norm).filter(Boolean))].sort();
+ const ents=[...new Set(DATA.sentencias.rows.map(r=>r.entity).filter(Boolean))].sort();
+ const regs=[...new Set(DATA.sentencias.rows.map(r=>r.regime).filter(Boolean))].sort();
+ const selected=state.sentInvestors||[];
+ const selectedText=selected.length?selected.map(investorLabel).join(' + '):'Todas las empresas';
+ let h=projectHeader(p,'Portafolio judicial · selección múltiple de empresas inversionistas');
+ h+=`<div class="tabs"><button class="tab ${state.sentTab==='Vigente'?'active':''}" onclick="state.sentTab='Vigente';render()">Vigentes</button><button class="tab ${state.sentTab==='Cancelado'?'active':''}" onclick="state.sentTab='Cancelado';render()">Canceladas</button></div>
+ <div class="filters">
+  <div class="multi-filter">
+   <label>Empresas inversionistas · selección múltiple</label>
+   <div class="multi-options">
+    <label class="checkchip ${selected.length===0?'selected':''}"><input type="checkbox" ${selected.length===0?'checked':''} onchange="if(this.checked)clearSentInvestors();else this.checked=true">Todas</label>
+    ${invs.map(x=>`<label class="checkchip ${selected.includes(x)?'selected':''}"><input type="checkbox" ${selected.includes(x)?'checked':''} onchange="toggleSentInvestor('${x}',this.checked)">${esc(investorLabel(x))}</label>`).join('')}
+   </div>
+   <div class="selection-note">Selección actual: <b>${esc(selectedText)}</b>. Los totales usan únicamente la participación atribuible a las empresas seleccionadas.</div>
+  </div>
+  <div class="filter"><label>Entidad</label><select onchange="state.sentEntity=this.value;render()"><option value="ALL">Todas</option>${ents.map(x=>`<option ${state.sentEntity===x?'selected':''}>${x}</option>`).join('')}</select></div>
+  <div class="filter"><label>Régimen</label><select onchange="state.sentRegime=this.value;render()"><option value="ALL">Todos</option>${regs.map(x=>`<option ${state.sentRegime===x?'selected':''}>${x}</option>`).join('')}</select></div>
+  <div class="filter"><label>Buscar caso</label><input placeholder="Nombre del caso" value="${esc(state.sentQuery)}" oninput="state.sentQuery=this.value;render()"></div>
+ </div>`;
+ h+=`<div class="kpis">
+  ${kpi('Sentencias',unique,'Casos jurídicos únicos filtrados')}
+  ${kpi('Inversión',money(inv),'Suma atribuible · '+selectedText)}
+  ${kpi(state.sentTab==='Vigente'?'Valoración actual':'Valor recibido / retorno',money(val),'Suma atribuible')}
+  ${kpi(state.sentTab==='Vigente'?'Utilidad potencial':'Utilidad realizada',money(profit))}
+  ${kpi(state.sentTab==='Vigente'?'TIR portafolio':'TIR realizada',tir==null?'—':pct(tir),'Recalculada con flujos combinados')}
+  ${kpi('Empresas seleccionadas',selected.length||invs.length,selectedText)}
+ </div>`;
+ h+=`<div class="section-title"><div><h3>${state.sentTab==='Vigente'?'Portafolio vigente':'Negocios cancelados'}</h3><p>La misma sentencia se cuenta una sola vez en el número de casos; sus participaciones financieras sí se suman según las empresas seleccionadas.</p></div></div>
+ <div class="tablewrap"><table><thead><tr><th>Estado</th><th>Caso</th><th>Inversionista</th><th>% Part.</th><th>Fecha inversión</th><th style="text-align:right">Inversión</th><th style="text-align:right">${state.sentTab==='Vigente'?'Valoración actual':'Retorno real'}</th><th style="text-align:right">TIR</th></tr></thead><tbody>
+ ${rows.map(r=>`<tr><td><span class="status ${r.state==='Vigente'?'ready':''}">${r.state}</span></td><td><button class="case-link" onclick="openCase('${encodeURIComponent(r.group_key)}')">${esc(r.case)}</button><div class="muted" style="font-size:10px">${esc(r.entity||'')} · ${esc(r.regime||'')}</div></td><td>${esc(investorLabel(r.investor_norm)||'—')}</td><td>${r.participation_pct==null?'—':r.participation_pct.toLocaleString('es-CO',{maximumFractionDigits:2})+'%'}</td><td>${dateFmt(r.invest_date)}</td><td class="num">${money(r.investment)}</td><td class="num">${money(r.current_or_return)}</td><td class="num">${pct(r.tirCalc||0)}</td></tr>`).join('')}
+ </tbody></table></div>
+ <div class="source">Fuente: ${esc(DATA.sentencias.summary.source)} · Actualizada ${DATA.sentencias.summary.updated} · Selección: ${esc(selectedText)}</div>`;
+ return h
+}
 function openCase(encoded){const key=decodeURIComponent(encoded);const c=DATA.sentencias.cases.find(x=>x.group_key===key);if(!c)return; $('#modalTitle').textContent=c.case;$('#modalSubtitle').textContent=[c.entity,c.turno,c.regime].filter(Boolean).join(' · '); const invMap=new Map(); c.investors.forEach(i=>{const k=i.name; if(!invMap.has(k))invMap.set(k,{name:k,participation_pct:0,investment:0,current_or_return:0,tir:[]});const x=invMap.get(k);x.participation_pct=Math.max(x.participation_pct,i.participation_pct||0);x.investment+=i.investment;x.current_or_return+=i.current_or_return;x.tir.push(i.tir)}); const invs=[...invMap.values()]; $('#modalBody').innerHTML=`<div class="detail-grid"><div class="detail"><small>Estado</small><b>${c.state}</b></div><div class="detail"><small>Fecha ejecutoria</small><b>${dateFmt(c.fecha_ejecutoria)}</b></div><div class="detail"><small>Fecha cuenta cobro</small><b>${dateFmt(c.fecha_cobro)}</b></div><div class="detail"><small>Inversión consolidada</small><b>${money(c.investment)}</b></div><div class="detail"><small>${c.state==='Vigente'?'Valoración actual':'Retorno / valor registrado'}</small><b>${money(c.current_or_return)}</b></div><div class="detail"><small>Resultado</small><b>${money(c.profit)}</b></div><div class="detail"><small>Participaciones</small><b>${invs.length}</b></div><div class="detail"><small>Componentes fuente</small><b>${c.rows}</b></div></div><div class="section-title"><div><h3>Participación por empresa</h3><p>Consolidada dentro del caso</p></div></div><div class="tablewrap"><table style="min-width:650px"><thead><tr><th>Empresa</th><th>% participación</th><th style="text-align:right">Inversión</th><th style="text-align:right">Valor / retorno</th><th style="text-align:right">TIR fuente</th></tr></thead><tbody>${invs.map(i=>`<tr><td>${esc(i.name)}</td><td>${i.participation_pct.toLocaleString('es-CO',{maximumFractionDigits:2})}%</td><td class="num">${money(i.investment)}</td><td class="num">${money(i.current_or_return)}</td><td class="num">${pct(i.tir.reduce((a,b)=>a+b,0)/Math.max(1,i.tir.length))}</td></tr>`).join('')}</tbody></table></div><div class="section-title"><div><h3>Ficha consolidada</h3><p>La versión productiva añadirá línea de tiempo, suspensiones, tasas, eventos de venta/pago y soportes.</p></div></div><div class="notice">Esta ficha ya conserva la jerarquía Sentencia → Participaciones → Componentes y será el punto de entrada al detalle jurídico-financiero definido en el Paso 100.</div>`;$('#caseModal').classList.add('show')}
 function renderLiquitty(p){
  const s=DATA.liquitty.summary, proj=DATA.liquitty.projection, act=DATA.liquitty.actual;
