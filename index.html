@@ -225,7 +225,7 @@ function utcDateMs(s){if(!s)return null;const p=s.split('-').map(Number);if(p.le
 function monthKeyFromMs(ms){const d=new Date(ms);return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')}
 function monthLabelFromMs(ms){return new Intl.DateTimeFormat('es-CO',{month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(ms))}
 function sentTimelineChart(rawRows){
- const dated=rawRows.map(r=>({r,date:DATA.sentencias.expectationDates[String(r.row)]||null})).filter(x=>x.date&&Number(x.r.valoracion_pago||0)>0);
+ const dated=rawRows.map(r=>({r,date:r.expectation_date||(DATA.sentencias.expectationDates&&DATA.sentencias.expectationDates[String(r.row)])||null})).filter(x=>x.date&&Number(x.r.valoracion_pago||0)>0);
  const valuationTotal=sum(rawRows,'current_or_return');
  const valuationDates=rawRows.map(r=>utcDateMs(r.valuation_date)).filter(x=>x!=null);
  const currentMs=valuationDates.length?Math.max(...valuationDates):utcDateMs(state.cutoff);
@@ -376,8 +376,32 @@ function renderLiquitty(p){
 function renderPending(p){return projectHeader(p,'Proyecto configurado en SOCIOS')+globalFilters()+`<div class="empty panel"><h3 style="margin-top:0">Estructura lista</h3><p>Este proyecto ya hace parte del menú y de los filtros globales. La fuente financiera todavía no ha sido incorporada al MVP.</p><span class="status">Pendiente de fuente / configuración</span><div class="source">No se muestran ceros para evitar interpretar ausencia de datos como saldo financiero.</div></div>`}
 function renderProject(){const p=projectById(state.project);$('#pageTitle').textContent=p.name;$('#pageSub').textContent=p.companies.join(' · ');let h;if(p.id==='as')h=renderAS(p);else if(p.id==='boracay')h=renderBoracay(p);else if(p.id==='colegios')h=renderColegios(p);else if(p.id==='sentencias')h=renderSentencias(p);else if(p.id==='liquitty')h=renderLiquitty(p);else h=renderPending(p);$('#content').innerHTML=h}
 function renderInvestments(){state.project=null;$('#pageTitle').textContent='Inversiones';$('#pageSub').textContent='Proyectos clasificados como inversión';const ps=DATA.projects.filter(p=>p.type==='Inversión'&&projectAllowed(p));$('#content').innerHTML=globalFilters()+`<div class="project-grid">${ps.map(projectCard).join('')}</div>`}
-function renderAlerts(){state.project=null;$('#pageTitle').textContent='Alertas';$('#pageSub').textContent='Control de calidad y actualización';const pending=DATA.projects.filter(p=>p.status!=='Con datos');$('#content').innerHTML=`<div class="kpis">${kpi('Pendientes de fuente',pending.length)}${kpi('Fuentes activas',DATA.projects.length-pending.length)}${kpi('Sentencias fuente',DATA.sentencias.summary.rows+' filas','22 vigentes · 13 canceladas')}</div><div class="section-title"><div><h3>Pendientes del MVP</h3><p>Proyectos listos para recibir información</p></div></div><div class="project-grid">${pending.map(projectCard).join('')}</div>`}
+function renderAlerts(){state.project=null;$('#pageTitle').textContent='Alertas';$('#pageSub').textContent='Control de calidad y actualización';const pending=DATA.projects.filter(p=>p.status!=='Con datos');$('#content').innerHTML=`<div class="kpis">${kpi('Pendientes de fuente',pending.length)}${kpi('Fuentes activas',DATA.projects.length-pending.length)}${kpi('Sentencias fuente',DATA.sentencias.summary.rows+' filas',(DATA.sentencias.summary.vigente_rows||0)+' vigentes · '+(DATA.sentencias.summary.cancelado_rows||0)+' canceladas')}</div><div class="section-title"><div><h3>Pendientes del MVP</h3><p>Proyectos listos para recibir información</p></div></div><div class="project-grid">${pending.map(projectCard).join('')}</div>`}
 function render(){setNav();if(state.project)renderProject();else if(state.view==='investments')renderInvestments();else if(state.view==='alerts')renderAlerts();else renderGeneral()}
-$('#closeModal').onclick=()=>$('#caseModal').classList.remove('show');$('#caseModal').onclick=e=>{if(e.target.id==='caseModal')$('#caseModal').classList.remove('show')};initNav();render();if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+$('#closeModal').onclick=()=>$('#caseModal').classList.remove('show');$('#caseModal').onclick=e=>{if(e.target.id==='caseModal')$('#caseModal').classList.remove('show')};
+async function loadLiveData(){
+ try{
+  const r=await fetch('/api/data',{cache:'no-store',headers:{'accept':'application/json'}});
+  if(!r.ok)return false;
+  const j=await r.json(), projects=j.projects||{};
+  let changed=false;
+  Object.entries(projects).forEach(([key,value])=>{
+   if(!value)return;
+   const before=DATA[key]?.live?.version||DATA[key]?.summary?.source||'';
+   const after=value?.live?.version||value?.summary?.source||'';
+   DATA[key]=value;
+   if(before!==after)changed=true;
+  });
+  window.SOCIOS_LIVE_META=j.meta||null;
+  return changed;
+ }catch(e){return false}
+}
+(async()=>{
+ await loadLiveData();
+ initNav();
+ render();
+ setInterval(async()=>{if(await loadLiveData())render()},30000);
+ if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+})();
 </script>
 </body></html>
