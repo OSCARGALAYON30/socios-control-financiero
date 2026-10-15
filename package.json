@@ -1,0 +1,11 @@
+{
+  "name": "socios-control-financiero",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@vercel/blob": "2.8.1",
+    "@vercel/functions": "3.10.1",
+    "xlsx": "0.18.5"
+  }
+}
