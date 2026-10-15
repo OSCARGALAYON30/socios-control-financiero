@@ -19,6 +19,9 @@ button,input,select{font:inherit}.app{min-height:100vh;display:grid;grid-templat
 
 .multi-filter{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:320px}.multi-filter>label{display:block;font-size:10px;text-transform:uppercase;color:#98a2b3;letter-spacing:.06em;margin-bottom:7px}.multi-options{display:flex;gap:7px;flex-wrap:wrap}.checkchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 9px;font-size:12px;color:#475467;background:#fff;cursor:pointer}.checkchip.selected{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8;font-weight:650}.checkchip input{margin:0;width:auto}.selection-note{font-size:11px;color:#667085;margin-top:6px}
 @media(max-width:520px){.multi-filter{min-width:100%}.multi-options{display:grid;grid-template-columns:1fr}.checkchip{border-radius:9px;min-height:42px}}
+
+.sent-timeline{margin-top:14px}.sent-timeline svg{width:100%;height:auto;display:block;overflow:visible}.timeline-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#667085}.timeline-key{display:inline-flex;align-items:center;gap:6px}.timeline-swatch{width:24px;height:3px;border-radius:3px;display:inline-block}.timeline-current{background:#2563eb}.timeline-projected{background:#15803d}.timeline-detail{margin-top:12px;border:1px solid #e5e7eb;background:#f8fafc;border-radius:10px;padding:12px;min-height:64px}.timeline-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.timeline-detail-grid small{display:block;color:#667085;margin-bottom:3px}.timeline-detail-grid b{display:block;font-size:14px}.sent-point{cursor:pointer;transition:r .12s ease}.sent-point:hover{r:7}.timeline-case-list{margin-top:9px;font-size:11px;color:#475467;line-height:1.5}.timeline-note{font-size:11px;color:#667085;margin-top:8px}
+@media(max-width:700px){.timeline-detail-grid{grid-template-columns:1fr 1fr}.timeline-legend{gap:10px}}
 </style>
 </head>
 <body>
@@ -42,6 +45,7 @@ const DATA={"meta": {"generated": "2026-10-09", "app": "SOCIOS MVP", "mode": "Co
 DATA.liquitty={"summary":{"investment":295898912,"investment_date":"2025-10-30","months":96,"projected_net_total":515320036.37,"projected_profit":219421124.37,"actual_gross":234154309.27,"commission_cost":41002157.74,"commission_vat":7790409.53,"actual_net":185361742,"remaining_capital":110537170,"recovery_pct":0.6264360377235858,"execution_vs_projection_to_date":1.0649519728204186,"ahead_vs_projection_to_date":11305308.72,"actual_periods":12,"owner":"INVERSIONES EON","source":"08102026_LIQUITTY.xlsx","updated":"2026-10-14"},"projection":[9734343.563876014,11530053.78360535,14566859.595629975,17899781.11034347,16324625.136363754,16080498.157625217,15575109.911316972,14523597.061741883,13659442.28394673,16063348.061819538,13827425.772887891,14271348.83744253,13709353.613240348,11566378.155638663,12235591.809010498,11721903.055271262,11538509.491202204,10235545.050886061,10928946.339209884,9011066.319240179,9545251.217942571,10213333.816528888,9273545.70165355,8160948.518351508,7361587.845443345,7154925.242779762,7065708.9935932355,6791117.958481758,7185638.960395625,5981229.414317465,4952204.386766822,5633851.214692319,4990664.586422742,5243157.030153184,5462697.349443225,3886997.9239955833,3704148.5313000577,3618201.5772014977,3402537.476704066,3709401.0411259807,3532804.1827461794,2743855.4651844935,2925568.141086189,2860019.0720520504,2764849.38872739,2942453.04824167,2997656.366253855,2759382.3117538975,2999229.1215873463,2748767.010489675,2402238.7423634073,2935539.5673283124,2690440.335161097,2591644.939453171,2531335.386479383,2619579.938148509,2319733.237968972,2646143.2508864934,2560444.378851665,2447416.388059617,2657190.6045591338,2369242.314266209,2286921.047553803,2492442.3176672794,2373095.044849432,2301848.6279409323,2209043.1522192075,2260515.1731361533,2145837.939221854,2430327.8006560565,2107430.222090399,2281798.481992017,2314900.4439035114,1917393.7144174501,2040337.88308426,2106681.7637504307,1946906.0152504635,2177078.8286086563,1987304.7132659736,1944806.2385877408,1973894.7593639996,1952080.9794519916,1851338.7992172365,1982746.5401057187,1791927.5595852833,1744931.6227930281,1726455.5234169168,1708202.8595081375,1690170.8572002454,1650543.427957543,1633400.671847548,1616462.2526089817,1599725.6671683963,1583188.4432650611,1566848.1390713295,1537039.7671100427],"actual":[{"month":1,"gross":15315103,"net":12291580,"commission":2540776,"vat":482747},{"month":2,"gross":16087121.64,"net":12729470,"commission":2821556,"vat":536095.64},{"month":3,"gross":18495382,"net":14635091,"commission":3243942.0168067194,"vat":616348.9831932767},{"month":4,"gross":25355843.85,"net":20063658,"commission":4447215,"vat":844970.85},{"month":5,"gross":18653195.35,"net":14970663,"commission":3094565,"vat":587967.35},{"month":6,"gross":18531119.1368,"net":14872687,"commission":3074312.72,"vat":584119.4168},{"month":7,"gross":23817494.62,"net":18846391,"commission":4177398,"vat":793705.62},{"month":8,"gross":19922596.16,"net":15764422,"commission":3494264,"vat":663910.16},{"month":9,"gross":26825471.23,"net":21184375,"commission":4740417,"vat":900679.23},{"month":10,"gross":18526392.47,"net":14680892,"commission":3231513,"vat":613987.47},{"month":11,"gross":16143617.32,"net":12462795,"commission":3093128,"vat":587694.32},{"month":12,"gross":16480972.49,"net":12859718,"commission":3043071,"vat":578183.49}]};
 DATA.colegios={"summary":{"wg_total":375071339,"fc_total":365758512.25,"difference":9312826.75,"lower_partner":"FC","available":9312826.75,"company":"INTEEGRA","source":"01102026_Resumen Colegios.xlsx","updated":"2026-10-01"},"years":[{"year":"2023","WG":92120334,"FC":80685150},{"year":"2024","WG":102871100,"FC":100041456.02},{"year":"2025","WG":104031865,"FC":118182020},{"year":"2026","WG":76048040,"FC":66849886.23}],"detail":{"WG":[{"year":2023,"beneficiary":"GIMNASIO FONTANA","value":92120334},{"year":2024,"beneficiary":"GIMNASIO FONTANA","value":102871100},{"year":2025,"beneficiary":"GIMNASIO FONTANA","value":104031865},{"year":2026,"beneficiary":"GIMNASIO FONTANA","value":76048040}],"FC":[{"year":2023,"beneficiary":"COLEGIO VICTORIA SCHOOL","value":79303150},{"year":2023,"beneficiary":"KAJUYALI","value":1382000},{"year":2024,"beneficiary":"COLEGIO VICTORIA SCHOOL","value":97513456.02},{"year":2024,"beneficiary":"KAJUYALI","value":2528000},{"year":2025,"beneficiary":"COLEGIO VICTORIA SCHOOL","value":111397020},{"year":2025,"beneficiary":"KAJUYALI","value":6785000},{"year":2026,"beneficiary":"COLEGIO VICTORIA SCHOOL","value":66849886.23}]}};
 DATA.as={"summary":{"wg_total":120643728.47,"fc_total":150380132.2,"difference":29736403.73,"source":"14102026_ASF_ASW.xlsx","updated":"2026-10-15","companies":["NETCOL","INTEEGRA"],"partners":["WG","FC"]},"matrix":{"NETCOL":{"WG":{"total":52204295.2,"count":64,"categories":[{"category":"SERV GENERALES","value":22386554.2},{"category":"CLASES","value":10207869},{"category":"RESTAURANTE","value":9546478},{"category":"TIQUETES","value":5952394},{"category":"EQUIPO DE COMPUTO Y TECNOLOGIA","value":3968900},{"category":"PARQUEADEROS","value":142100}]},"FC":{"total":100020774.2,"count":102,"categories":[{"category":"COLSANITAS","value":76106020},{"category":"RESTAURANTE","value":9787863},{"category":"SERV GENERALES","value":8201029.2},{"category":"TIQUETES","value":5289712},{"category":"MUEBLES","value":382850},{"category":"PARQUEADEROS","value":253300}]}},"INTEEGRA":{"WG":{"total":68439433.27,"count":41,"categories":[{"category":"SERV GENERALES","value":22341868.27},{"category":"ASESORIA","value":14477413},{"category":"PREDIALES","value":7752000},{"category":"EQUIPO AUDIOVISUAL","value":6312353},{"category":"VEHICULOS","value":5128292},{"category":"TIQUETES","value":4467800},{"category":"RESTAURANTE","value":3934210},{"category":"CLASES","value":3782635},{"category":"COMPRAS GENERALES","value":242862}]},"FC":{"total":50359358,"count":6,"categories":[{"category":"TIQUETES","value":17751745},{"category":"ASESORIA","value":14477413},{"category":"PREDIALES","value":14475000},{"category":"COLSANITAS","value":3655200}]}}}};
+DATA.sentencias.expectationDates={"2":"2025-08-16","3":"2028-01-09","4":"2025-11-29","5":"2026-01-09","6":"2028-08-05","7":"2026-11-03","8":"2027-10-10","9":"2026-07-19","10":"2027-05-30","11":"2027-08-02","12":"2027-04-26","13":"2026-11-27","14":"2027-04-09","15":"2026-11-29","16":"2029-04-01","17":"2027-12-07","18":"2025-03-16","19":"2027-01-03","20":"2027-01-03","21":"2022-01-31","22":"2029-05-22","23":"2023-06-17","24":"2029-05-22","25":"2025-01-10","26":"2029-11-17","27":"2029-11-17","28":"2028-04-08","29":"2028-04-08","30":"2028-10-30","31":"2028-10-30","32":"2028-03-28","33":"2029-03-06","34":"2028-09-16","35":"2028-09-16","36":"2026-12-14"};
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const money=n=>new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(Number(n||0));
 const compact=n=>new Intl.NumberFormat('es-CO',{notation:'compact',maximumFractionDigits:1}).format(Number(n||0));
@@ -207,8 +211,73 @@ function aggregateSentRows(status){
   return x
  })
 }
+let sentTimelinePoints=[];
+function sentRawFiltered(status='Vigente'){
+ const selected=state.sentInvestors||[];
+ return DATA.sentencias.rows
+  .filter(r=>r.state===status)
+  .filter(r=>selected.length===0||selected.includes(r.investor_norm))
+  .filter(r=>state.sentEntity==='ALL'||r.entity===state.sentEntity)
+  .filter(r=>state.sentRegime==='ALL'||r.regime===state.sentRegime)
+  .filter(r=>!state.sentQuery||r.case.toLowerCase().includes(state.sentQuery.toLowerCase()))
+}
+function utcDateMs(s){if(!s)return null;const p=s.split('-').map(Number);if(p.length!==3||p.some(x=>!Number.isFinite(x)))return null;return Date.UTC(p[0],p[1]-1,p[2])}
+function monthKeyFromMs(ms){const d=new Date(ms);return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')}
+function monthLabelFromMs(ms){return new Intl.DateTimeFormat('es-CO',{month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(ms))}
+function sentTimelineChart(rawRows){
+ const dated=rawRows.map(r=>({r,date:DATA.sentencias.expectationDates[String(r.row)]||null})).filter(x=>x.date&&Number(x.r.valoracion_pago||0)>0);
+ const valuationTotal=sum(rawRows,'current_or_return');
+ const valuationDates=rawRows.map(r=>utcDateMs(r.valuation_date)).filter(x=>x!=null);
+ const currentMs=valuationDates.length?Math.max(...valuationDates):utcDateMs(state.cutoff);
+ if(!dated.length||!currentMs)return '<section class="panel sent-timeline"><div class="panelhead"><div><h3>Proyección de ingreso vs. valoración actual</h3><p>No hay fechas de expectativa de pago disponibles para la selección actual.</p></div></div></section>';
+ const buckets=new Map();
+ let overdue=0;
+ dated.forEach(({r,date})=>{
+   const originalMs=utcDateMs(date); if(originalMs==null)return;
+   const effectiveMs=Math.max(originalMs,currentMs);
+   if(originalMs<currentMs)overdue++;
+   const key=monthKeyFromMs(effectiveMs);
+   if(!buckets.has(key))buckets.set(key,{ms:effectiveMs,income:0,cases:[]});
+   const b=buckets.get(key); b.income+=Number(r.valoracion_pago||0); b.cases.push({case:r.case,investor:investorLabel(r.investor_norm),value:Number(r.valoracion_pago||0),originalDate:date});
+ });
+ const ordered=[...buckets.values()].sort((a,b)=>a.ms-b.ms);
+ let cumulative=0;
+ const points=[{ms:currentMs,income:0,cumulative:0,cases:[],label:monthLabelFromMs(currentMs),isStart:true}];
+ ordered.forEach(b=>{cumulative+=b.income;points.push({...b,cumulative,label:monthLabelFromMs(b.ms)})});
+ const projectedTotal=cumulative;
+ const maxMs=Math.max(points[points.length-1].ms,currentMs+30*86400000);
+ const minMs=currentMs, maxY=Math.max(valuationTotal,projectedTotal,1)*1.08;
+ const W=1060,H=350,L=74,R=28,T=28,B=48;
+ const x=ms=>L+((ms-minMs)/(maxMs-minMs||1))*(W-L-R);
+ const y=v=>T+(1-v/maxY)*(H-T-B);
+ const projPts=points.map(p=>x(p.ms).toFixed(1)+','+y(p.cumulative).toFixed(1)).join(' ');
+ const yTicks=[0,.25,.5,.75,1].map(q=>({v:maxY*q,y:y(maxY*q)}));
+ const tickCount=6;
+ const xTicks=Array.from({length:tickCount},(_,i)=>minMs+(maxMs-minMs)*(i/(tickCount-1)));
+ sentTimelinePoints=points.map((p,i)=>({...p,valuation:valuationTotal,gap:p.cumulative-valuationTotal,index:i}));
+ const casesTotal=new Set(rawRows.map(r=>r.group_key)).size;
+ return `<section class="panel sent-timeline">
+  <div class="panelhead"><div><h3>Proyección de ingreso vs. valoración actual</h3><p>Línea de tiempo del portafolio vigente filtrado · ingreso proyectado acumulado</p></div><span class="pill green">${casesTotal} casos</span></div>
+  <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Proyección de ingreso acumulado versus valoración actual de sentencias">
+   ${yTicks.map(t=>`<line x1="${L}" x2="${W-R}" y1="${t.y}" y2="${t.y}" stroke="#e5e7eb" stroke-width="1"/><text x="${L-10}" y="${t.y+4}" text-anchor="end" font-size="10" fill="#667085">${compact(t.v)}</text>`).join('')}
+   ${xTicks.map(ms=>`<line x1="${x(ms)}" x2="${x(ms)}" y1="${T}" y2="${H-B}" stroke="#f1f3f5" stroke-width="1"/><text x="${x(ms)}" y="${H-18}" text-anchor="middle" font-size="10" fill="#667085">${monthLabelFromMs(ms)}</text>`).join('')}
+   <line x1="${L}" x2="${W-R}" y1="${y(valuationTotal)}" y2="${y(valuationTotal)}" stroke="#2563eb" stroke-width="3"/>
+   <polyline points="${projPts}" fill="none" stroke="#15803d" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+   ${points.map((p,i)=>`<circle class="sent-point" cx="${x(p.ms)}" cy="${y(p.cumulative)}" r="${i===0?4:5}" fill="#15803d" stroke="#fff" stroke-width="2" tabindex="0" role="button" aria-label="${esc(p.label)}" onmouseenter="showSentTimelinePoint(${i})" onclick="showSentTimelinePoint(${i})" onfocus="showSentTimelinePoint(${i})"/>`).join('')}
+  </svg>
+  <div class="timeline-legend"><span class="timeline-key"><i class="timeline-swatch timeline-current"></i>Valoración actual · ${money(valuationTotal)}</span><span class="timeline-key"><i class="timeline-swatch timeline-projected"></i>Ingreso proyectado acumulado · ${money(projectedTotal)}</span></div>
+  <div id="sentTimelineDetail" class="timeline-detail"><div class="timeline-detail-grid"><div><small>Fecha de valoración</small><b>${dateFmt(rawRows[0]?.valuation_date||state.cutoff)}</b></div><div><small>Valoración actual</small><b>${money(valuationTotal)}</b></div><div><small>Ingreso proyectado total</small><b>${money(projectedTotal)}</b></div><div><small>Diferencia proyectada</small><b>${money(projectedTotal-valuationTotal)}</b></div></div><div class="timeline-note">Selecciona un punto de la línea verde para ver el ingreso previsto de ese periodo y las sentencias que lo componen.${overdue?' '+overdue+' expectativa(s) anteriores a la fecha de valoración se concentran en el punto inicial.':''}</div></div>
+  <div class="source">Comparación basada en Fecha Valoración / Valoración (X/Y) y Expectativa de Pago / Valoración en Pago (AA/AB) del archivo fuente.</div>
+ </section>`
+}
+function showSentTimelinePoint(i){
+ const p=sentTimelinePoints[i], box=document.getElementById('sentTimelineDetail'); if(!p||!box)return;
+ const cases=(p.cases||[]).map(c=>`<div>• ${esc(c.case)} · ${esc(c.investor)} · ${money(c.value)}${c.originalDate&&utcDateMs(c.originalDate)<p.ms?' · expectativa original '+dateFmt(c.originalDate):''}</div>`).join('');
+ box.innerHTML=`<div class="timeline-detail-grid"><div><small>Periodo</small><b>${p.label}</b></div><div><small>Ingreso del periodo</small><b>${money(p.income)}</b></div><div><small>Proyección acumulada</small><b>${money(p.cumulative)}</b></div><div><small>Brecha vs. valoración</small><b>${money(p.gap)}</b></div></div>${cases?`<div class="timeline-case-list">${cases}</div>`:'<div class="timeline-note">Inicio de la línea de tiempo.</div>'}`;
+}
 function renderSentencias(p){
  const rows=aggregateSentRows(state.sentTab);
+ const rawRows=sentRawFiltered(state.sentTab);
  const inv=sum(rows,'investment'), val=sum(rows,'current_or_return'), profit=val-inv;
  const flows=[];
  rows.forEach(r=>{if(r.invest_date)flows.push({date:r.invest_date,value:-r.investment});if(r.valuation_date)flows.push({date:r.valuation_date,value:r.current_or_return})});
@@ -243,6 +312,7 @@ function renderSentencias(p){
   ${kpi(state.sentTab==='Vigente'?'TIR portafolio':'TIR realizada',tir==null?'—':pct(tir),'Recalculada con flujos combinados')}
   ${kpi('Empresas seleccionadas',selected.length||invs.length,selectedText)}
  </div>`;
+ if(state.sentTab==='Vigente')h+=sentTimelineChart(rawRows);
  h+=`<div class="section-title"><div><h3>${state.sentTab==='Vigente'?'Portafolio vigente':'Negocios cancelados'}</h3><p>La misma sentencia se cuenta una sola vez en el número de casos; sus participaciones financieras sí se suman según las empresas seleccionadas.</p></div></div>
  <div class="tablewrap"><table><thead><tr><th>Estado</th><th>Caso</th><th>Inversionista</th><th>% Part.</th><th>Fecha inversión</th><th style="text-align:right">Inversión</th><th style="text-align:right">${state.sentTab==='Vigente'?'Valoración actual':'Retorno real'}</th><th style="text-align:right">TIR</th></tr></thead><tbody>
  ${rows.map(r=>`<tr><td><span class="status ${r.state==='Vigente'?'ready':''}">${r.state}</span></td><td><button class="case-link" onclick="openCase('${encodeURIComponent(r.group_key)}')">${esc(r.case)}</button><div class="muted" style="font-size:10px">${esc(r.entity||'')} · ${esc(r.regime||'')}</div></td><td>${esc(investorLabel(r.investor_norm)||'—')}</td><td>${r.participation_pct==null?'—':r.participation_pct.toLocaleString('es-CO',{maximumFractionDigits:2})+'%'}</td><td>${dateFmt(r.invest_date)}</td><td class="num">${money(r.investment)}</td><td class="num">${money(r.current_or_return)}</td><td class="num">${pct(r.tirCalc||0)}</td></tr>`).join('')}
