@@ -45,6 +45,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .reset-filters-btn{border:1px solid #c7dfff;background:#eef5ff;color:#0066cc;border-radius:10px;padding:9px 14px;font-weight:650;cursor:pointer;transition:background .15s}
 .reset-filters-btn:hover{background:#dcecff}
 @media(max-width:520px){.reset-filter-toolbar{flex-wrap:wrap}.reset-filters-btn{width:100%}}
+.salary-chart{padding:16px 12px 8px}.salary-chart-row{display:grid;grid-template-columns:46px 1fr 72px;gap:10px;align-items:center;margin:0 0 15px}.salary-chart-row>b{font-size:13px}.salary-chart-row>small{text-align:right;color:#6e6e73}.salary-chart-bars{display:flex;flex-direction:column;gap:5px}.salary-chart-bar{height:11px;background:#f0f1f5;border-radius:10px;overflow:hidden}.salary-chart-fill{display:block;height:100%;border-radius:10px}.salary-chart-fill.wg{background:#007aff}.salary-chart-fill.fc{background:#31b7a5}.salary-chart-legend{display:flex;flex-wrap:wrap;gap:16px;font-size:11px;color:#6e6e73;margin-top:12px}.salary-chart-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.salary-chart-legend i.wg{background:#007aff}.salary-chart-legend i.fc{background:#31b7a5}.salary-notes{padding:8px 14px 16px;font-size:13px;line-height:1.6}.salary-notes .source{margin-top:14px}
 </style>
 </head>
 <body>
@@ -80,6 +81,8 @@ const compact=n=>new Intl.NumberFormat('es-CO',{notation:'compact',maximumFracti
 const pct=n=>new Intl.NumberFormat('es-CO',{style:'percent',maximumFractionDigits:2}).format(Number(n||0));
 const dateFmt=s=>{if(!s)return '—'; const d=new Date(s+'T00:00:00'); return new Intl.DateTimeFormat('es-CO',{day:'2-digit',month:'short',year:'numeric'}).format(d)};
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+DATA.salarios={summary:{source:'26102026_Salarios Inv. Eón.xlsx',sheet:'Resumen',updated:'2026-10-26T23:00:08Z',hash:'GOnCkdT3YXyv3r8zg7I1oL1nBg4=',wg_total:77311655.13,fc_total:77311655.13,total:154623310.26,difference:0},rows:[{"year":2022,"wg":2905044,"fc":2905044},{"year":2023,"wg":0,"fc":0},{"year":2024,"wg":34915939.8,"fc":34915939.8},{"year":2025,"wg":39490671.33,"fc":39490671.33},{"year":2026,"wg":0,"fc":0}]};
+const salaryProject=DATA.projects.find(p=>p.id==='salarios');if(salaryProject){salaryProject.status='Con datos';salaryProject.source=DATA.salarios.summary.source;}
 DATA.projects.push({id:'casas',name:'Casas',type:'Inversión',companies:['INVERSIONES EON'],status:'Pendiente de fuente',source:null});
 const projectById=id=>DATA.projects.find(p=>p.id===id);
 let state={view:'general',project:null,company:'ALL',soc:'ALL',colegiosSocio:'ALL',asCompanies:[],asPartners:[],status:'ALL',cutoff:'2026-10-14',sentTab:'Vigente',sentInvestors:[],sentEntity:'ALL',sentRegime:'ALL',sentQuery:''};
@@ -526,8 +529,47 @@ function renderPlanes(p){
  '<section class="panel" style="margin-top:14px"><h3>Detalle de movimientos · '+filtered.length+'</h3><div class="tablewrap"><table><thead><tr><th>Fecha</th><th>Origen</th><th>Socio contable</th><th>Empleado final</th><th class="num">Valor</th></tr></thead><tbody>'+filtered.map(r=>'<tr><td>'+esc(r.date)+'</td><td>'+esc(r.origin)+'</td><td>'+esc(r.partner)+'</td><td>'+esc(names[r.employee]||'Sin clasificar')+' ('+esc(r.employee||'—')+')</td><td class="num">'+money(r.value)+'</td></tr>').join('')+'</tbody></table></div><p class="source">Fuente: '+esc(s.source||'SharePoint')+' · Total filtrado: '+money(sum(filtered))+'</p></section>';
 }
 function renderSalarios(p){
- return projectHeader(p,'Equilibrio salarial · Juliana Chica → WG · Sofía Barrera → FC')+
- '<section class="panel"><h3>Reglas de asignación al equilibrio</h3><p>Los salarios pagados a <b>Juliana Chica</b> se imputarán como aportes de <b>William Gutiérrez (WG)</b>. Los salarios pagados a <b>Sofía Barrera</b> se imputarán como aportes de <b>Fabio Cuéllar (FC)</b>.</p><p class="source">Pendiente de importar y conciliar la fuente de nómina. No se incorporan saldos al consolidado hasta disponer de movimientos verificables; no se contabilizan los mismos pagos dos veces.</p></section>';
+ const data=DATA.salarios||{},rows=data.rows||[],s=data.summary||{};
+ const selected=String(window.salaryYear||'ALL');
+ const selectedSoc=String(window.salaryPartner||'ALL');
+ const filtered=rows.filter(r=>selected==='ALL'||String(r.year)===selected);
+ const wg=filtered.reduce((a,r)=>a+Number(r.wg||0),0);
+ const fc=filtered.reduce((a,r)=>a+Number(r.fc||0),0);
+ const total=wg+fc,diff=Math.abs(wg-fc);
+ const fmt=n=>new Intl.NumberFormat('es-CO',{maximumFractionDigits:0}).format(n/1e6);
+ const fmtExact=n=>new Intl.NumberFormat('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+ const max=Math.max(1,...filtered.map(r=>Math.max(r.wg,r.fc)));
+ const rowItems=filtered.map(r=>{
+  const a=selectedSoc==='ALL'||selectedSoc==='WG'?'<td>'+money(r.wg)+'</td>':'<td>—</td>';
+  const b=selectedSoc==='ALL'||selectedSoc==='FC'?'<td>'+money(r.fc)+'</td>':'<td>—</td>';
+  return '<tr><td>'+r.year+'</td>'+a+b+'<td>'+money(r.wg+r.fc)+'</td><td>'+money(Math.abs(r.wg-r.fc))+'</td></tr>';
+ }).join('');
+ const barItems=filtered.map(r=>{
+  const wgWidth=(r.wg/max*100).toFixed(2),fcWidth=(r.fc/max*100).toFixed(2);
+  return '<div class="salary-chart-row"><b>'+r.year+'</b><div class="salary-chart-bars">'+
+  (selectedSoc!=='FC'?'<div class="salary-chart-bar"><span class="salary-chart-fill wg" style="width:'+wgWidth+'%"></span></div>':'')+
+  (selectedSoc!=='WG'?'<div class="salary-chart-bar"><span class="salary-chart-fill fc" style="width:'+fcWidth+'%"></span></div>':'')+
+  '</div><small>'+fmt(r.wg+r.fc)+' M</small></div>';
+ }).join('');
+ return projectHeader(p,'Resumen de salarios · Juliana Chica → WG · Sofía Barrera → FC')+
+ '<div class="filters"><div class="filter"><label>Año</label><select onchange="window.salaryYear=this.value;render()"><option value="ALL">Todos los años</option>'+
+ rows.map(r=>'<option value="'+r.year+'" '+(selected===String(r.year)?'selected':'')+'>'+r.year+'</option>').join('')+
+ '</select></div><div class="filter"><label>Socio imputado</label><select onchange="window.salaryPartner=this.value;render()">'+
+ [['ALL','WG y FC'],['WG','WG · Juliana Chica'],['FC','FC · Sofía Barrera']].map(([v,t])=>'<option value="'+v+'" '+(selectedSoc===v?'selected':'')+'>'+t+'</option>').join('')+
+ '</select></div></div>'+
+ '<div class="kpis">'+kpi('WG · Juliana Chica',selectedSoc==='FC'?'—':money(wg),'Imputación a William Gutiérrez')+
+ kpi('FC · Sofía Barrera',selectedSoc==='WG'?'—':money(fc),'Imputación a Fabio Cuéllar')+
+ kpi('Total reportado',money(total),'Hoja Resumen · cifras en millones')+
+ kpi('Diferencia WG / FC',money(diff),diff===0?'Equilibrado':'Diferencia entre socios')+'</div>'+
+ '<div class="grid2"><section class="panel"><div class="panelhead"><div><h3>Evolución anual de salarios</h3><p>Comparación por año · millones de COP</p></div></div>'+
+ '<div class="salary-chart">'+barItems+'<div class="salary-chart-legend"><span><i class="wg"></i>Juliana Chica → WG</span><span><i class="fc"></i>Sofía Barrera → FC</span></div></div></section>'+
+ '<section class="panel"><div class="panelhead"><div><h3>Criterios de imputación</h3><p>Control de equilibrio entre socios</p></div></div>'+
+ '<div class="salary-notes"><p><b>Juliana Chica Torres</b> se registra como aporte atribuible a <b>William Gutiérrez (WG)</b>.</p>'+
+ '<p><b>Sofía Catalina Barrera Perea</b> se registra como aporte atribuible a <b>Fabio Cuéllar (FC)</b>.</p>'+
+ '<p class="source">Fuente exclusiva: hoja <b>Resumen</b>. Los importes incluyen conceptos reportados en nómina y no constituyen por sí solos prueba de desembolso. Hasta validar pagos, este módulo no incrementa el consolidado general.</p></div></section></div>'+
+ '<section class="panel"><div class="panelhead"><div><h3>Detalle anual</h3><p>Datos exclusivos de la hoja Resumen</p></div></div>'+
+ '<div style="overflow-x:auto"><table class="table"><thead><tr><th>Año</th><th>WG · Juliana</th><th>FC · Sofía</th><th>Total</th><th>Diferencia</th></tr></thead><tbody>'+
+ rowItems+'</tbody></table></div><p class="source" style="margin-top:12px">Control de fuente sin filtros: WG $ '+fmtExact(s.wg_total||0)+' · FC $ '+fmtExact(s.fc_total||0)+' · Total $ '+fmtExact(s.total||0)+' COP. Fecha de actualización: '+esc(s.updated||'')+'.</p></section>';
 }
 function renderCasas(p){
  const sources=[projectById('casa-cj1'),projectById('casa-cj2')];
@@ -549,7 +591,7 @@ function renderAlerts(){state.project=null;$('#pageTitle').textContent='Alertas'
 function clearAllFilters(){
  const view=state.view,project=state.project;
  state={view,project,company:'ALL',soc:'ALL',colegiosSocio:'ALL',asCompanies:[],asPartners:[],status:'ALL',cutoff:'',sentTab:'Vigente',sentInvestors:[],sentEntity:'ALL',sentRegime:'ALL',sentQuery:''};
- for(const key of ['planesOrigin','planesEmployee','planesPair','planesYear'])window[key]='ALL';
+ for(const key of ['planesOrigin','planesEmployee','planesPair','planesYear','salaryYear','salaryPartner'])window[key]='ALL';
  render();
 }
 function render(){
