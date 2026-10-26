@@ -428,8 +428,8 @@ function renderCableado(p){
  return h;
 }
 function renderPlanes(p){
- const d=DATA.planes,s=d.summary,rows=d.rows||[],names={SF:'Sofia Barrera',JC:'Juliana Chica',FC:'Fabio Cuellar',WG:'William Gutierrez'};
- const origins=['INTEEGRA','EON'],pairs=[['SF','FC'],['JC','WG']];
+ const d=DATA.planes,s=d.summary,rows=d.rows||[],names={SB:'Sofia Barrera',JC:'Juliana Chica',FC:'Fabio Cuellar',WG:'William Gutierrez'};
+ const origins=['INTEEGRA','EON'],pairs=[['SB','FC'],['JC','WG']];
  const total=rr=>rr.reduce((a,r)=>a+Number(r.value||0),0);
  const display=e=>names[e]||e;
  const groupTable=(title,groups)=>'<section class="panel"><h3>'+title+'</h3><div class="tablewrap"><table><thead><tr><th>Grupo</th><th class="num">Valor asignado</th><th class="num">Movimientos</th></tr></thead><tbody>'+groups.map(([label,rr])=>'<tr><td>'+esc(label)+'</td><td class="num">'+money(total(rr))+'</td><td class="num">'+rr.length+'</td></tr>').join('')+'</tbody></table></div></section>';
@@ -438,7 +438,7 @@ function renderPlanes(p){
  const byPair=pairs.map(pair=>[pair.map(x=>display(x)).join(' + '),rows.filter(r=>pair.includes(r.employee))]);
  const unmatched=rows.filter(r=>!pairs.some(pair=>pair.includes(r.employee)));
  const unmatchedTotal=total(unmatched);
- const warn=unmatched.length?'<div class="notice" style="margin:12px 0"><b>Empleados pendientes de homologación:</b> '+[...new Set(unmatched.map(r=>r.employee))].map(esc).join(', ')+'. Estos movimientos no se asignan automáticamente a las parejas. Valor pendiente: '+money(unmatchedTotal)+'. Confirme si SB corresponde a SF.</div>':'';
+ const warn=unmatched.length?'<div class="notice" style="margin:12px 0"><b>Empleados pendientes de homologación:</b> '+[...new Set(unmatched.map(r=>r.employee))].map(esc).join(', ')+'. Estos movimientos no se asignan automáticamente a las parejas. Valor pendiente: '+money(unmatchedTotal)+'. Verifique el código del empleado en la fuente.</div>':'';
  const rowsHtml=rows.map(r=>'<tr><td>'+esc(r.date)+'</td><td>'+esc(r.origin)+'</td><td>'+esc(r.partner)+'</td><td>'+esc(display(r.employee))+' ('+esc(r.employee)+')</td><td class="num">'+money(r.value)+'</td></tr>').join('');
  return projectHeader(p,'Asignaciones por empresa, empleado y pareja')+globalFilters()+
  '<div class="kpis">'+kpi('Total asignado',money(total(rows)))+kpi('INTEEGRA',money(total(byOrigin[0][1])))+kpi('EON',money(total(byOrigin[1][1])))+kpi('Movimientos',String(rows.length))+kpi('Última fuente',esc(s.source),esc(s.updated))+'</div>'+
