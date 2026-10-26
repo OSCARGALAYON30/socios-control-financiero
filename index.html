@@ -428,7 +428,7 @@ function renderCableado(p){
  return h;
 }
 function renderPlanes(p){
- const d=DATA.planes,s=d.summary,rows=d.rows||[],names={SB:'Sofia Barrera',JC:'Juliana Chica',FC:'Fabio Cuellar',WG:'William Gutierrez'};
+ const d=DATA.planes,s=d.summary,allRows=d.rows||[],rows=allRows.filter(r=>state.company==='ALL'||r.origin===(state.company==='INVERSIONES EON'?'EON':state.company)),names={SB:'Sofia Barrera',JC:'Juliana Chica',FC:'Fabio Cuellar',WG:'William Gutierrez'};
  const origins=['INTEEGRA','EON'],pairs=[['SB','FC'],['JC','WG']];
  const total=rr=>rr.reduce((a,r)=>a+Number(r.value||0),0);
  const display=e=>names[e]||e;
@@ -440,7 +440,9 @@ function renderPlanes(p){
  const unmatchedTotal=total(unmatched);
  const warn=unmatched.length?'<div class="notice" style="margin:12px 0"><b>Empleados pendientes de homologación:</b> '+[...new Set(unmatched.map(r=>r.employee))].map(esc).join(', ')+'. Estos movimientos no se asignan automáticamente a las parejas. Valor pendiente: '+money(unmatchedTotal)+'. Verifique el código del empleado en la fuente.</div>':'';
  const rowsHtml=rows.map(r=>'<tr><td>'+esc(r.date)+'</td><td>'+esc(r.origin)+'</td><td>'+esc(r.partner)+'</td><td>'+esc(display(r.employee))+' ('+esc(r.employee)+')</td><td class="num">'+money(r.value)+'</td></tr>').join('');
- return projectHeader(p,'Asignaciones por empresa, empleado y pareja')+globalFilters()+
+ const originFilter=state.company==='INVERSIONES EON'?'EON':state.company==='INTEEGRA'?'INTEEGRA':'ALL';
+ const planesFilters='<div class="filters"><div class="filter"><label>Origen de recursos</label><select onchange="state.company=this.value;render()"><option value="ALL" '+(originFilter==='ALL'?'selected':'')+'>Todas</option><option value="INTEEGRA" '+(originFilter==='INTEEGRA'?'selected':'')+'>INTEEGRA</option><option value="INVERSIONES EON" '+(originFilter==='EON'?'selected':'')+'>EON</option></select></div></div>';
+ return projectHeader(p,'Asignaciones por empresa, empleado y pareja')+planesFilters+
  '<div class="kpis">'+kpi('Total asignado',money(total(rows)))+kpi('INTEEGRA',money(total(byOrigin[0][1])))+kpi('EON',money(total(byOrigin[1][1])))+kpi('Movimientos',String(rows.length))+kpi('Última fuente',esc(s.source),esc(s.updated))+'</div>'+
  '<p class="source">El equilibrio WG - FC permanece en el consolidado general. Este módulo analiza origen de recursos y destinatarios finales.</p>'+
  '<div class="grid2">'+groupTable('Origen de recursos',byOrigin)+groupTable('Empleados finales',byEmployee)+'</div>'+
