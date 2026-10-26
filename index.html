@@ -41,6 +41,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text"
 button.back,.filter select,.filter input{border-radius:11px}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid rgba(0,122,255,.3);outline-offset:2px}
 
+.reset-filter-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:10px 14px;background:rgba(255,255,255,.8);border:1px solid #e5e5ea;border-radius:14px;color:#6e6e73;font-size:12px;font-weight:600}
+.reset-filters-btn{border:1px solid #c7dfff;background:#eef5ff;color:#0066cc;border-radius:10px;padding:9px 14px;font-weight:650;cursor:pointer;transition:background .15s}
+.reset-filters-btn:hover{background:#dcecff}
+@media(max-width:520px){.reset-filter-toolbar{flex-wrap:wrap}.reset-filters-btn{width:100%}}
 </style>
 </head>
 <body>
@@ -542,7 +546,27 @@ function renderEquilibrium(){
 }
 function renderInvestments(){state.project=null;$('#pageTitle').textContent='Inversiones';$('#pageSub').textContent='Proyectos clasificados como inversión';const ps=INVESTMENT_MENU.map(id=>projectById(id)).filter(p=>p&&projectAllowed(p));$('#content').innerHTML=globalFilters()+`<div class="project-grid">${ps.map(projectCard).join('')}</div>`}
 function renderAlerts(){state.project=null;$('#pageTitle').textContent='Alertas';$('#pageSub').textContent='Control de calidad y actualización';const pending=DATA.projects.filter(p=>p.status!=='Con datos');$('#content').innerHTML=`<div class="kpis">${kpi('Pendientes de fuente',pending.length)}${kpi('Fuentes activas',DATA.projects.length-pending.length)}${kpi('Sentencias fuente',DATA.sentencias.summary.rows+' filas',(DATA.sentencias.summary.vigente_rows||0)+' vigentes · '+(DATA.sentencias.summary.cancelado_rows||0)+' canceladas')}</div><div class="section-title"><div><h3>Pendientes del MVP</h3><p>Proyectos listos para recibir información</p></div></div><div class="project-grid">${pending.map(projectCard).join('')}</div>`}
-function render(){setNav();if(state.project)renderProject();else if(state.view==='equilibrium')renderEquilibrium();else if(state.view==='investments')renderInvestments();else if(state.view==='alerts')renderAlerts();else renderGeneral()}
+function clearAllFilters(){
+ const view=state.view,project=state.project;
+ state={view,project,company:'ALL',soc:'ALL',colegiosSocio:'ALL',asCompanies:[],asPartners:[],status:'ALL',cutoff:'',sentTab:'Vigente',sentInvestors:[],sentEntity:'ALL',sentRegime:'ALL',sentQuery:''};
+ for(const key of ['planesOrigin','planesEmployee','planesPair','planesYear'])window[key]='ALL';
+ render();
+}
+function render(){
+ setNav();
+ if(state.project)renderProject();
+ else if(state.view==='equilibrium')renderEquilibrium();
+ else if(state.view==='investments')renderInvestments();
+ else if(state.view==='alerts')renderAlerts();
+ else renderGeneral();
+ const content=$('#content');
+ if(content){
+  const toolbar=document.createElement('div');
+  toolbar.className='reset-filter-toolbar';
+  toolbar.innerHTML='<span>Consulta interactiva</span><button type="button" class="reset-filters-btn" onclick="clearAllFilters()" title="Quitar filtros de todos los proyectos y volver a la vista completa">↺ Borrar todos los filtros</button>';
+  content.prepend(toolbar);
+ }
+}
 $('#closeModal').onclick=()=>$('#caseModal').classList.remove('show');$('#caseModal').onclick=e=>{if(e.target.id==='caseModal')$('#caseModal').classList.remove('show')};
 async function loadLiveData(){
  try{
